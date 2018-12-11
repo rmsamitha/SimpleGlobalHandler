@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.AbstractSynapseHandler;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 
 public class SimpleGlobalHandler extends AbstractSynapseHandler {
@@ -26,10 +27,18 @@ public class SimpleGlobalHandler extends AbstractSynapseHandler {
     }
 
     public boolean handleResponseOutFlow(MessageContext messageContext) {
+        int responseCode;
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
-        Integer httpStatusCode = (Integer) axis2MC.getProperty("HTTP_SC");
-        log.info("HTTP Status Code : " + httpStatusCode);
+        if(axis2MC.getProperty(SynapseConstants.HTTP_SC) instanceof  String){
+            responseCode = Integer.parseInt((String) axis2MC.getProperty(SynapseConstants.HTTP_SC));
+        } else {
+            responseCode = (Integer) axis2MC.getProperty(SynapseConstants.HTTP_SC);
+        }
+        log.info("HTTP Status Code : " + responseCode);
+        Integer errorCode = (Integer) messageContext.getProperty(SynapseConstants.ERROR_CODE);
+        log.info("HTTP Error Code : " + errorCode);
+
         return true;
     }
 }
